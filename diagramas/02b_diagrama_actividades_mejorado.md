@@ -1,25 +1,23 @@
 # Diagrama de Actividades Mejorado
 
+
 ```mermaid
 graph TD
     A[🟢 Inicio]
-    B["(A) Ir a Login"]
-    C["(A) Ingresar Email<br/>y Contraseña"]
-    D{"(D) Credenciales<br/>Válidas?"}
-    E["(A) Mostrar Error"]
-    F["(A) Generar Token"]
-    G["(A) Cargar Dashboard"]
-    H{"(D) Seleccionar<br/>Componente"}
-    I["(A) Cargar Perfil"]
-    J["(A) Cargar Calendario"]
-    K["(A) Cargar Mapa"]
-    L["(A) Mostrar Info"]
-    M["(A) Cerrar Sesión"]
-    N["(F) Fork 1<br/>Perfil"]
-    O["(F) Fork 2<br/>Calendario"]
-    P["(F) Fork 3<br/>Mapa"]
-    Q["(J) Join"]
-    R["(M) Merge"]
+    B["Ir a Login"]
+    C["Ingresar Email<br/>y Contraseña"]
+    D{"Credenciales<br/>Válidas?"}
+    E["Mostrar Error"]
+    F["Generar Token"]
+    G["Cargar Dashboard"]
+    H{"Seleccionar<br/>Componente"}
+    I["Cargar Perfil"]
+    J["Cargar Calendario"]
+    K["Cargar Mapa"]
+    M["Cerrar Sesión"]
+    N["Fork 1<br/>Perfil"]
+    O["Fork 2<br/>Calendario"]
+    P["Fork 3<br/>Mapa"]
     S["🔴 Fin"]
     
     A --> B
@@ -40,12 +38,9 @@ graph TD
     O --> J
     P --> K
     
-    I --> Q
-    J --> Q
-    K --> Q
-    
-    Q --> R
-    R --> H
+    I --> H
+    J --> H
+    K --> H
     
     M --> S
 ```
