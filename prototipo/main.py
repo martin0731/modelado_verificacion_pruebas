@@ -4,7 +4,8 @@ Prototipo de Sistema Universidad Web - Lógica de Negocio
 
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional
-
+import json
+import os
 
 class Estudiante:
     """Clase que representa un estudiante"""
@@ -16,7 +17,6 @@ class Estudiante:
         self.facultad = facultad
         self.semestre = semestre
         self.asignaturas = {}
-        self.eventos = []
     
     def agregar_asignatura(self, nombre: str, codigo: str, creditos: int, nota: float):
         """Agregar una asignatura al estudiante"""
@@ -46,23 +46,6 @@ class Estudiante:
         }
 
 
-class Evento:
-    """Clase que representa un evento académico"""
-    
-    def __init__(self, nombre: str, fecha: str, tipo: str, descripcion: str = ""):
-        self.nombre = nombre
-        self.fecha = fecha
-        self.tipo = tipo
-        self.descripcion = descripcion
-    
-    def to_dict(self) -> Dict:
-        """Convertir evento a diccionario"""
-        return {
-            'nombre': self.nombre,
-            'fecha': self.fecha,
-            'tipo': self.tipo,
-            'descripcion': self.descripcion
-        }
 
 
 class Ubicacion:
@@ -92,14 +75,68 @@ class SistemaUniversidad:
     def __init__(self):
         self.estudiantes = {}
         self.usuario_actual = None
-        self.eventos = []
         self.ubicaciones = []
-        self._inicializar_datos()
-    
-    def _inicializar_datos(self):
-        """Inicializar datos de prueba"""
         
-        # Crear estudiante
+        # Ruta de datos
+        self.ruta_datos = os.path.join(os.path.dirname(__file__), 'data')
+        self.ruta_estudiantes = os.path.join(self.ruta_datos, 'estudiantes.json')
+        self.ruta_ubicaciones = os.path.join(self.ruta_datos, 'ubicaciones.json')
+        
+        # Asegurar que la carpeta data existe
+        os.makedirs(self.ruta_datos, exist_ok=True)
+        
+        # Cargar datos desde JSON
+        self._cargar_datos()
+    
+    def _cargar_datos(self):
+        """Cargar datos desde archivos JSON"""
+        # Cargar estudiantes
+        if os.path.exists(self.ruta_estudiantes):
+            try:
+                with open(self.ruta_estudiantes, 'r', encoding='utf-8') as f:
+                    datos_estudiantes = json.load(f)
+                    for email, datos in datos_estudiantes.items():
+                        estudiante = Estudiante(
+                            id=datos['id'],
+                            nombre=datos['nombre'],
+                            email=datos['email'],
+                            facultad=datos['facultad'],
+                            semestre=datos['semestre']
+                        )
+                        if 'asignaturas' in datos:
+                            for codigo, asig in datos['asignaturas'].items():
+                                estudiante.asignaturas[codigo] = asig
+                        
+                        # Guardar eventos del estudiante
+                        eventos = []
+                        if 'eventos' in datos:
+                            eventos = datos['eventos']
+                        
+                        self.estudiantes[email] = {
+                            'estudiante': estudiante,
+                            'contraseña': datos.get('contraseña', 'password'),
+                            'eventos': eventos
+                        }
+            except Exception as e:
+                print(f"Error al cargar estudiantes: {e}")
+                self._inicializar_datos_defecto()
+        else:
+            self._inicializar_datos_defecto()
+        
+        # Cargar ubicaciones (estas sí son globales)
+        if os.path.exists(self.ruta_ubicaciones):
+            try:
+                with open(self.ruta_ubicaciones, 'r', encoding='utf-8') as f:
+                    datos_ubicaciones = json.load(f)
+                    self.ubicaciones = [
+                        Ubicacion(u['nombre'], u['facultad'], u['latitud'], u['longitud'], u.get('descripcion', ''))
+                        for u in datos_ubicaciones
+                    ]
+            except Exception as e:
+                print(f"Error al cargar ubicaciones: {e}")
+    
+    def _inicializar_datos_defecto(self):
+        """Inicializar datos de prueba por defecto"""
         estudiante = Estudiante(
             id="2024001",
             nombre="Juan Pérez",
@@ -107,8 +144,6 @@ class SistemaUniversidad:
             facultad="Ingeniería de Sistemas",
             semestre=4
         )
-        
-        # Agregar asignaturas
         estudiante.agregar_asignatura("Programación Avanzada", "IS201", 3, 4.5)
         estudiante.agregar_asignatura("Bases de Datos", "IS202", 3, 4.2)
         estudiante.agregar_asignatura("Redes de Computadores", "IS203", 3, 4.8)
@@ -119,24 +154,37 @@ class SistemaUniversidad:
             'contraseña': 'password'
         }
         
-        # Crear eventos
-        hoy = datetime.now()
-        self.eventos = [
-            Evento("Parcial 1", (hoy + timedelta(days=7)).strftime("%Y-%m-%d"), "Evaluación", "Primera prueba escrita"),
-            Evento("Entrega Proyecto", (hoy + timedelta(days=15)).strftime("%Y-%m-%d"), "Entrega", "Proyecto final"),
-            Evento("Parcial 2", (hoy + timedelta(days=25)).strftime("%Y-%m-%d"), "Evaluación", "Segunda prueba escrita"),
-            Evento("Examen Final", (hoy + timedelta(days=35)).strftime("%Y-%m-%d"), "Examen", "Evaluación final"),
-        ]
-        
-        # Crear ubicaciones
-        self.ubicaciones = [
-            Ubicacion("Edificio A", "Rectoría", 4.7489, -74.0891, "Aulas 101-110"),
-            Ubicacion("Edificio B", "Ingeniería", 4.7490, -74.0892, "Laboratorios de Cómputo"),
-            Ubicacion("Biblioteca Central", "Servicios", 4.7491, -74.0893, "3 pisos, 50000 libros"),
-            Ubicacion("Cafetería", "Servicios", 4.7488, -74.0890, "Zona de descanso"),
-            Ubicacion("Edificio C", "Facultad de Ciencias", 4.7492, -74.0894, "Aulas 201-210"),
-            Ubicacion("Laboratorio de Sistemas", "Ingeniería", 4.7489, -74.0889, "Equipos y software especializado"),
-        ]
+        # Guardar datos defecto en JSON
+        self._guardar_estudiantes()
+    
+    def _guardar_estudiantes(self):
+        """Guardar estudiantes en JSON"""
+        try:
+            datos = {}
+            for email, usuario in self.estudiantes.items():
+                estud = usuario['estudiante']
+                datos[email] = {
+                    'id': estud.id,
+                    'nombre': estud.nombre,
+                    'email': estud.email,
+                    'contraseña': usuario['contraseña'],
+                    'facultad': estud.facultad,
+                    'semestre': estud.semestre,
+                    'asignaturas': estud.asignaturas
+                }
+            with open(self.ruta_estudiantes, 'w', encoding='utf-8') as f:
+                json.dump(datos, f, indent=2, ensure_ascii=False)
+        except Exception as e:
+            print(f"Error al guardar estudiantes: {e}")
+    
+    def _guardar_ubicaciones(self):
+        """Guardar ubicaciones en JSON"""
+        try:
+            datos = [ubicacion.to_dict() for ubicacion in self.ubicaciones]
+            with open(self.ruta_ubicaciones, 'w', encoding='utf-8') as f:
+                json.dump(datos, f, indent=2, ensure_ascii=False)
+        except Exception as e:
+            print(f"Error al guardar ubicaciones: {e}")
     
     def login(self, email: str, contraseña: str) -> Dict:
         """Autenticar usuario"""
@@ -180,14 +228,25 @@ class SistemaUniversidad:
             }
         }
     
-    def obtener_calendario(self) -> Dict:
-        """Obtener eventos del calendario"""
-        if not self.usuario_actual:
-            return {'success': False, 'mensaje': 'No hay sesión activa'}
+    def obtener_calendario(self, email: str = None) -> Dict:
+        """Obtener eventos del calendario del estudiante"""
+        usuario = None
+        if email and email in self.estudiantes:
+            usuario = self.estudiantes[email]
+        elif self.usuario_actual:
+            usuario_email = None
+            for e, datos in self.estudiantes.items():
+                if datos['estudiante'] == self.usuario_actual:
+                    usuario = datos
+                    break
         
+        if not usuario:
+            return {'success': False, 'mensaje': 'No hay sesión activa', 'eventos': []}
+        
+        eventos = usuario.get('eventos', [])
         return {
             'success': True,
-            'eventos': [evento.to_dict() for evento in self.eventos]
+            'eventos': eventos
         }
     
     def obtener_mapa(self) -> Dict:
@@ -200,16 +259,22 @@ class SistemaUniversidad:
             'ubicaciones': [ubicacion.to_dict() for ubicacion in self.ubicaciones]
         }
     
-    def obtener_inicio(self) -> Dict:
+    def obtener_inicio(self, email: str = None) -> Dict:
         """Obtener información de inicio"""
-        if not self.usuario_actual:
-            return {'success': False, 'mensaje': 'No hay sesión activa'}
+        usuario = None
+        if email and email in self.estudiantes:
+            usuario = self.estudiantes[email]['estudiante']
+        elif self.usuario_actual:
+            usuario = self.usuario_actual
+        
+        if not usuario:
+            return {'success': False, 'mensaje': 'No hay sesión activa', 'bienvenida': 'Error'}
         
         return {
             'success': True,
-            'bienvenida': f'¡Bienvenido {self.usuario_actual.nombre}!',
+            'bienvenida': f'¡Bienvenido {usuario.nombre}!',
             'mensaje': 'Selecciona una opción del menú',
-            'estudiante': self.usuario_actual.nombre
+            'estudiante': usuario.nombre
         }
 
 
@@ -228,7 +293,7 @@ def main():
     
     # Prueba de Inicio
     print("\n2. PROBANDO INICIO")
-    resultado = sistema.obtener_inicio()
+    resultado = sistema.obtener_inicio(email="juan.perez@universidad.edu")
     print(f"   {resultado['bienvenida']}")
     print(f"   {resultado['mensaje']}")
     
@@ -242,35 +307,18 @@ def main():
         print(f"   Email: {perfil['email']}")
         print(f"   Facultad: {perfil['facultad']}")
         print(f"   Promedio: {perfil['promedio']}")
-        print(f"   Asignaturas:")
-        for asig in perfil['asignaturas']:
-            print(f"     - {asig['nombre']}: {asig['nota']}")
     
     # Prueba de Calendario
     print("\n4. PROBANDO CALENDARIO")
-    resultado = sistema.obtener_calendario()
+    resultado = sistema.obtener_calendario(email="juan.perez@universidad.edu")
     if resultado['success']:
-        print(f"   Eventos próximos:")
-        for evento in resultado['eventos']:
-            print(f"     - {evento['nombre']} ({evento['fecha']})")
+        print(f"   Eventos próximos: {len(resultado['eventos'])} eventos")
     
-    # Prueba de Mapa
+    # Prueba de Mapa 
     print("\n5. PROBANDO MAPA")
     resultado = sistema.obtener_mapa()
     if resultado['success']:
-        print(f"   Ubicaciones disponibles:")
-        for ubicacion in resultado['ubicaciones']:
-            print(f"     - {ubicacion['nombre']} ({ubicacion['facultad']})")
-    
-    # Prueba de Logout
-    print("\n6. PROBANDO LOGOUT")
-    resultado = sistema.logout()
-    print(f"   {resultado['mensaje']}")
-    
-    # Prueba de acceso sin sesión
-    print("\n7. PROBANDO ACCESO SIN SESIÓN")
-    resultado = sistema.obtener_perfil()
-    print(f"   Resultado: {resultado['mensaje']}")
+        print(f"   Ubicaciones disponibles: {len(resultado['ubicaciones'])} ubicaciones")
     
     print("\n" + "=" * 50)
     print("FIN DE PRUEBAS")
@@ -278,4 +326,20 @@ def main():
 
 
 if __name__ == "__main__":
+    # Opción 1: Ejecutar pruebas de lógica
+    print("Iniciando Sistema Universidad...")
     main()
+    
+    # Opción 2: Levantar el servidor Flask
+    print("\n" + "=" * 50)
+    print("SERVIDOR FLASK INICIADO")
+    print("=" * 50)
+    print("🌐 Abre tu navegador en: http://localhost:9876")
+    print("📧 Email: juan.perez@universidad.edu")
+    print("🔐 Contraseña: password")
+    print("=" * 50)
+    print("Presiona CTRL+C para detener el servidor")
+    print("=" * 50)
+    
+    from app import app
+    app.run(debug=True, port=9876, host='127.0.0.1')

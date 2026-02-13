@@ -1,0 +1,26 @@
+[
+  {
+    "nombre": "Parcial 1",
+    "fecha": "2026-02-20",
+    "tipo": "Evaluación",
+    "descripcion": "Primera prueba escrita"
+  },
+  {
+    "nombre": "Entrega Proyecto",
+    "fecha": "2026-02-28",
+    "tipo": "Entrega",
+    "descripcion": "Proyecto final"
+  },
+  {
+    "nombre": "Parcial 2",
+    "fecha": "2026-03-10",
+    "tipo": "Evaluación",
+    "descripcion": "Segunda prueba escrita"
+  },
+  {
+    "nombre": "Examen Final",
+    "fecha": "2026-03-20",
+    "tipo": "Examen",
+    "descripcion": "Evaluación final"
+  }
+]

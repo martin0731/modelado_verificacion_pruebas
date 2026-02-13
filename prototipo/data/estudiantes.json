@@ -1,0 +1,68 @@
+{
+  "juan.perez@universidad.edu": {
+    "id": "2024001",
+    "nombre": "Juan Pérez",
+    "email": "juan.perez@universidad.edu",
+    "contraseña": "password",
+    "facultad": "Ingeniería de Sistemas",
+    "semestre": 4,
+    "asignaturas": {
+      "IS201": {
+        "nombre": "Programación Avanzada",
+        "codigo": "IS201",
+        "creditos": 3,
+        "nota": 4.5
+      },
+      "IS202": {
+        "nombre": "Bases de Datos",
+        "codigo": "IS202",
+        "creditos": 3,
+        "nota": 4.2
+      },
+      "IS203": {
+        "nombre": "Redes de Computadores",
+        "codigo": "IS203",
+        "creditos": 3,
+        "nota": 4.8
+      },
+      "IS204": {
+        "nombre": "Ingeniería de Software",
+        "codigo": "IS204",
+        "creditos": 4,
+        "nota": 4.0
+      }
+    },
+    "eventos": [
+      {
+        "nombre": "Parcial IS201",
+        "fecha": "2026-02-20",
+        "tipo": "Examen",
+        "descripcion": "Examen de Programación Avanzada"
+      },
+      {
+        "nombre": "Entrega Proyecto IS204",
+        "fecha": "2026-02-28",
+        "tipo": "Entrega",
+        "descripcion": "Proyecto final de Ingeniería de Software"
+      },
+      {
+        "nombre": "Parcial IS202",
+        "fecha": "2026-03-10",
+        "tipo": "Examen",
+        "descripcion": "Evaluación de Bases de Datos"
+      },
+      {
+        "nombre": "Reunión con Asesor",
+        "fecha": "2026-03-05",
+        "tipo": "Reunión",
+        "descripcion": "Seguimiento del semestre"
+      },
+      {
+        "nombre": "Examen Final IS203",
+        "fecha": "2026-03-20",
+        "tipo": "Examen",
+        "descripcion": "Evaluación final de Redes"
+      }
+    ]
+  }
+}
