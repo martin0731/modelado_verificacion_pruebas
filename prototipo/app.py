@@ -1,7 +1,7 @@
 """
 Prototipo Web con Flask - Sistema Universidad
 """
-
+## Martin Estrada y Juan Andrés Correa
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for
 from main import SistemaUniversidad
 import json
