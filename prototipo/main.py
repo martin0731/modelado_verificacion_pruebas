@@ -76,11 +76,13 @@ class SistemaUniversidad:
         self.estudiantes = {}
         self.usuario_actual = None
         self.ubicaciones = []
+        self.eventos = {}
         
         # Ruta de datos
         self.ruta_datos = os.path.join(os.path.dirname(__file__), 'data')
         self.ruta_estudiantes = os.path.join(self.ruta_datos, 'estudiantes.json')
         self.ruta_ubicaciones = os.path.join(self.ruta_datos, 'ubicaciones.json')
+        self.ruta_eventos = os.path.join(self.ruta_datos, 'eventos.json')
         
         # Asegurar que la carpeta data existe
         os.makedirs(self.ruta_datos, exist_ok=True)
@@ -122,6 +124,14 @@ class SistemaUniversidad:
                 self._inicializar_datos_defecto()
         else:
             self._inicializar_datos_defecto()
+        
+        # Cargar eventos
+        if os.path.exists(self.ruta_eventos):
+            try:
+                with open(self.ruta_eventos, 'r', encoding='utf-8') as f:
+                    self.eventos = json.load(f)
+            except Exception as e:
+                print(f"Error al cargar eventos: {e}")
         
         # Cargar ubicaciones (estas sí son globales)
         if os.path.exists(self.ruta_ubicaciones):
@@ -243,10 +253,18 @@ class SistemaUniversidad:
         if not usuario:
             return {'success': False, 'mensaje': 'No hay sesión activa', 'eventos': []}
         
-        eventos = usuario.get('eventos', [])
+        evento_ids = usuario.get('eventos', [])
+        # Convertir IDs de eventos a datos reales de eventos
+        eventos_datos = []
+        for evento_id in evento_ids:
+            if evento_id in self.eventos:
+                evento = self.eventos[evento_id].copy()
+                evento['id'] = evento_id
+                eventos_datos.append(evento)
+        
         return {
             'success': True,
-            'eventos': eventos
+            'eventos': eventos_datos
         }
     
     def obtener_mapa(self) -> Dict:
