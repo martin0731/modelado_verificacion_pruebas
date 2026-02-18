@@ -63,33 +63,29 @@ sequenceDiagram
 
 ```mermaid
 sequenceDiagram
+    autonumber
     actor Estudiante
-    participant UI
-    participant Backend
-    participant BD
-    
-    Estudiante->>UI: Click en Mapa
-    UI->>Backend: GET /ubicaciones
-    Backend->>BD: Select ubicaciones
-    BD-->>Backend: Ubicaciones
-    Backend-->>UI: JSON ubicaciones
-    UI->>UI: Cargar Google Maps
-    UI-->>Estudiante: Mostrar Mapa
-```
+    participant Sistema as SistemaUniversidad
+    participant JSON as Archivos JSON
 
-## Secuencia 5: Logout
+    Note over Sistema, JSON: Fase de Inicialización
+    Sistema->>JSON: _cargar_datos()
+    JSON-->>Sistema: Carga estudiantes y ubicaciones
 
-```mermaid
-sequenceDiagram
-    actor Estudiante
-    participant UI
-    participant Backend
-    
-    Estudiante->>UI: Click en Logout
-    UI->>Backend: POST /logout
-    Backend->>Backend: Invalidar token
-    Backend-->>UI: OK
-    UI->>UI: Limpiar localStorage
-    UI-->>Estudiante: Ir a Login
+    Note over Estudiante, Sistema: Fase de Interacción (Sesión)
+    Estudiante->>Sistema: login(email, contraseña)
+    Sistema-->>Estudiante: Éxito (usuario_actual definido)
+
+    Estudiante->>Sistema: obtener_perfil()
+    Sistema-->>Estudiante: Perfil + Notas (Promedio)
+
+    Estudiante->>Sistema: obtener_calendario()
+    Sistema-->>Estudiante: Lista de Eventos
+
+    Estudiante->>Sistema: obtener_mapa()
+    Sistema-->>Estudiante: Lista de Ubicaciones
+
+    Estudiante->>Sistema: logout()
+    Sistema-->>Estudiante: Sesión cerrada (usuario_actual = None)
 ```
 

@@ -1,85 +1,50 @@
-# Diagrama de Clases
+# Diagrama de Actividades Mejorado
+
 
 ```mermaid
 classDiagram
-    class Usuario {
-        -id: int
-        -email: string
-        -contraseña: string
-        -nombre: string
-        +autenticar()
-        +cerrarSesion()
-    }
-    
     class Estudiante {
-        -codigoEstudiante: string
-        -facultad: string
-        -semestre: int
-        +obtenerAsignaturas()
-        +obtenerCalificaciones()
+        +str id
+        +str nombre
+        +str email
+        +str facultad
+        +int semestre
+        +dict asignaturas
+        +agregar_asignatura(nombre, codigo, creditos, nota)
+        +obtener_promedio() float
+        +to_dict() dict
     }
-    
-    class Perfil {
-        -nombre: string
-        -id: string
-        -email: string
-        -facultad: string
-        +obtenerDatos()
-    }
-    
-    class Asignatura {
-        -id: int
-        -nombre: string
-        -codigo: string
-        -creditos: int
-        -profesor: string
-        +getDetalles()
-    }
-    
-    class Calificacion {
-        -id: int
-        -nota: float
-        -fecha: date
-        -estado: string
-        +isAprobada()
-    }
-    
-    class Calendario {
-        -id: int
-        -eventos: list
-        +obtenerEventos()
-        +obtenerHorarios()
-    }
-    
-    class Evento {
-        -id: int
-        -nombre: string
-        -fecha: date
-        -tipo: string
-        +getDetalles()
-    }
-    
-    class Mapa {
-        -id: int
-        -ubicaciones: list
-        +obtenerUbicaciones()
-        +buscarEdificio()
-    }
-    
-    class Ubicacion {
-        -id: int
-        -nombre: string
-        -latitud: float
-        -longitud: float
-        +getCoordenas()
-    }
-    
-    Usuario <|-- Estudiante
-    Estudiante --> Perfil
-    Estudiante --> Asignatura
-    Asignatura --> Calificacion
-    Estudiante --> Calendario
-    Calendario --> Evento
-    Mapa --> Ubicacion
-```
 
+    class Ubicacion {
+        +str nombre
+        +str facultad
+        +float latitud
+        +float longitud
+        +str descripcion
+        +to_dict() dict
+    }
+
+    class SistemaUniversidad {
+        +dict estudiantes
+        +Estudiante usuario_actual
+        +list ubicaciones
+        +str ruta_datos
+        +str ruta_estudiantes
+        +str ruta_ubicaciones
+        -cargar_datos()
+        -inicializar_datos_defecto()
+        -guardar_estudiantes()
+        -guardar_ubicaciones()
+        +login(email, contraseña) dict
+        +logout() dict
+        +obtener_perfil() dict
+        +obtener_calendario(email) dict
+        +obtener_mapa() dict
+        +obtener_inicio(email) dict
+    }
+
+    %% Relaciones exactas del código
+    SistemaUniversidad "1" --o "*" Estudiante : almacena en dict
+    SistemaUniversidad "1" --o "*" Ubicacion : almacena en lista
+    SistemaUniversidad "1" --> "0..1" Estudiante : gestiona usuario_actual
+```
