@@ -2,37 +2,30 @@
 
 ```mermaid
 graph TB
-    subgraph Presentacion["Capa de Presentación"]
-        UI[UI: Login, Dashboard, Perfil<br/>Calendario, Mapa]
+    subgraph Cliente["Cliente (Navegador)"]
+        UI[Vistas HTML/Bootstrap]
     end
     
-    subgraph Logica["Capa de Lógica de Negocio"]
-        Auth[Servicio Autenticación]
-        Perfil[Servicio Perfil]
-        Asignatura[Servicio Asignatura]
-        Calendario[Servicio Calendario]
-        Mapa[Servicio Mapa]
+    subgraph Aplicacion["Aplicación Flask (app.py)"]
+        Routes[Manejador de Rutas]
+        Session[Gestión de Sesiones]
     end
     
-    subgraph Datos["Capa de Datos"]
-        BD[Base de Datos]
-        Cache[Redis Cache]
+    subgraph Logica["Capa de Negocio (main.py)"]
+        Sistema[SistemaUniversidad]
+        Modelos[Clases: Estudiante, Ubicacion]
     end
     
-    UI --> Auth
-    UI --> Perfil
-    UI --> Asignatura
-    UI --> Calendario
-    UI --> Mapa
+    subgraph Persistencia["Capa de Datos (Carpeta /data)"]
+        JSON_E[estudiantes.json]
+        JSON_U[ubicaciones.json]
+    end
     
-    Auth --> BD
-    Perfil --> BD
-    Asignatura --> BD
-    Calendario --> BD
-    Mapa --> BD
-    
-    Perfil --> Cache
-    Asignatura --> Cache
-    Calendario --> Cache
+    UI <--> Routes
+    Routes <--> Session
+    Routes --> Sistema
+    Sistema --> Modelos
+    Sistema <--> JSON_E
+    Sistema <--> JSON_U
 ```
 

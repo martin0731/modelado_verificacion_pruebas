@@ -1,53 +1,26 @@
 # Diagrama de Despliegue
 
 ```mermaid
-graph TB
-    subgraph Clientes["Dispositivos Cliente"]
-        PC[PC]
-        Mobile[Móvil]
-        Tablet[Tablet]
+graph TD
+    subgraph Usuario["Usuario Final"]
+        Browser[Navegador Web]
     end
-    
-    subgraph Internet["HTTPS Internet"]
-        Net[Red Segura]
+
+    subgraph Servidor["Servidor Local / Host"]
+        subgraph Entorno["Runtime Python"]
+            Flask[Servidor Web Flask]
+            Logic[Lógica de Negocio]
+        end
+        
+        subgraph Almacenamiento["Sistema de Archivos"]
+            Data[Carpeta /data<br/>Archivos .json]
+            Static[Carpeta /static<br/>Mapa Campus .webp]
+        end
     end
-    
-    subgraph Servidores["Servidores de Aplicación"]
-        S1[Servidor 1<br/>Node.js]
-        S2[Servidor 2<br/>Node.js]
-        S3[Servidor 3<br/>Node.js]
-    end
-    
-    subgraph BaseDatos["Base de Datos"]
-        Master[MySQL Master]
-        Replica[MySQL Replica]
-    end
-    
-    subgraph Almacenamiento["Almacenamiento"]
-        Cache[Redis Cache]
-        Files[File Storage]
-    end
-    
-    PC -->|HTTPS| Net
-    Mobile -->|HTTPS| Net
-    Tablet -->|HTTPS| Net
-    
-    Net --> S1
-    Net --> S2
-    Net --> S3
-    
-    S1 --> Master
-    S2 --> Master
-    S3 --> Master
-    
-    Master --> Replica
-    
-    S1 --> Cache
-    S2 --> Cache
-    S3 --> Cache
-    
-    S1 --> Files
-    S2 --> Files
-    S3 --> Files
+
+    Browser -- "HTTP (Puerto 9876)" --> Flask
+    Flask -- "Llamadas a Métodos" --> Logic
+    Logic -- "Lectura/Escritura" --> Data
+    Flask -- "Sirve Archivos" --> Static
 ```
 
